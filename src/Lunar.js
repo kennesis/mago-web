@@ -1,0 +1,88 @@
+export default function getLunarMonth(year, month, day) {
+    const lunarInfo = [
+      0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0,
+      0x055d2, 0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2,
+      0x095b0, 0x14977, 0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60,
+      0x09570, 0x052f2, 0x04970, 0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60,
+      0x186e3, 0x092e0, 0x1c8d7, 0x0c950, 0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4,
+      0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557, 0x06ca0, 0x0b550, 0x15355, 0x04da0,
+      0x0a5d0, 0x14573, 0x052d0, 0x0a9a8, 0x0e950, 0x06aa0, 0x0aea5, 0x05ad0, 0x02b80,
+      0x0b4b7, 0x06a50, 0x06d40, 0x0af46, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260,
+      0x0f263, 0x0d950, 0x05b57, 0x056a0, 0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d5,
+      0x0d250, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977, 0x04970, 0x0a4b0, 0x0b4b5,
+      0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970, 0x06566, 0x0d4a0,
+      0x0ea50, 0x06e95, 0x05ad0, 0x02b80, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0,
+      0x0d2b2, 0x0a950, 0x0b557, 0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5d0, 0x14573,
+      0x052d0, 0x0a9a8, 0x0e950, 0x06aa0, 0x0aea5, 0x05ad0, 0x02bd0, 0x0b4b7, 0x06a50,
+      0x06d40, 0x0af46, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950,
+      0x05b57, 0x056a0, 0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d5, 0x0d250, 0x0b540,
+      0x0d6a0, 0x0ada2, 0x095b0, 0x14977, 0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40,
+      0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970, 0x06566, 0x0d4a0, 0x0ea50, 0x06e95,
+      0x05ad0, 0x02b80, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950,
+      0x0b557, 0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5d0, 0x14573, 0x052d0, 0x0a9a8
+    ];
+  
+    const solarDate = new Date(year, month - 1, day);
+    const baseDate = new Date(1900, 0, 31);
+    const offset = Math.floor((solarDate - baseDate) / (24 * 60 * 60 * 1000));
+  
+    let days = offset + 40;
+    let leap = 0;
+    let lunarYear = 0;
+    let lunarMonth = 0;
+    let lunarDay = 0;
+  
+    for (lunarYear = 1900; lunarYear < 2101 && days > 0; lunarYear++) {
+      leap = getLunarLeapMonth(lunarYear);
+      days -= 365 + (leap ? 1 : 0);
+    }
+  
+    if (days < 0) {
+      days += 365 + (leap ? 1 : 0);
+      lunarYear--;
+    }
+  
+    leap = getLunarLeapMonth(lunarYear);
+    for (lunarMonth = 1; lunarMonth < 13 && days > 0; lunarMonth++) {
+      if (leap && lunarMonth === leap + 1 && days === 29) {
+        lunarMonth--;
+        leap = 0;
+        lunarDay = 0;
+        break;
+      }
+  
+      days -= getLunarMonthDays(lunarYear, lunarMonth);
+    }
+  
+    if (days < 0) {
+      days += getLunarMonthDays(lunarYear, lunarMonth);
+      lunarMonth--;
+    }
+  
+    lunarDay = days + 1;
+  
+    return { lunarYear, lunarMonth, lunarDay };
+  }
+  
+  function getLunarMonthDays(year, month) {
+    if ((getLunarMonthInfo(year) & (0x10000 >> month)) === 0) {
+      return 29;
+    } else {
+      return 30;
+    }
+  }
+  
+  function getLunarMonthInfo(year) {
+    return lunarInfo[year - 1900];
+  }
+  
+  function getLunarLeapMonth(year) {
+    return getLunarMonthInfo(year) & 0xf;
+  }
+  
+  // 테스트
+//   const solarDate = new Date(2023, 10, 15); // 양력 날짜: 2023-11-15
+//   const lunarDate = getLunarMonth(solarDate.getFullYear(), solarDate.getMonth() + 1, solarDate.getDate());
+//   console.log(`양력 날짜: ${solarDate.getFullYear()}-${solarDate.getMonth() + 1}-${solarDate.getDate()}`);
+//   console.log(`음력 날짜: ${lunarDate.lunarYear}-${lunarDate.lunarMonth}-${lunarDate.lunarDay}`);
+  

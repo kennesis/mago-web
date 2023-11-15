@@ -1,38 +1,83 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+#root {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex: 1;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+.헤더 {
+  position: sticky;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.달력 {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  max-width: 100vw;
+}
+
+.달력이름 {
+  display: flex;
+  justify-content: center;
+}
+
+.요일 {
+  display: flex;
+  width: 100vw;
+  justify-content: space-around;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.모든날 {
+  /* scroll-snap-type: x mandatory; */
+  /* scroll-behavior: smooth; */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.모든날::-webkit-scrollbar {
+  display: none;
+}
+
+.한해 {
+  display: flex;
+  flex-direction: row;
+}
+
+.한달 {
+  position: relative;
+  min-width: 100vw;
+  scroll-snap-align: center;
+  display: grid;
+  flex: 1;
+  flex-direction: row;
+}
+
+.한주 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 0.5px solid lightgray;
+}
+
+.하루 {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.오늘 {
+  width: 40px;
+}
+
+.메뉴 {
+  width: 40px;
 }
