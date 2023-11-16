@@ -1,4 +1,4 @@
-function gregory(year, month) {
+export default function gregory(year, month) {
 
     let first = getDayOfTheYear(year, month);
     let dayOfTheMonth = getDayOfTheMonth(year, month, first);

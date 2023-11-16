@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
+// import getLunarMonth from './Lunar';
 // import * as _ from 'lodash';
 import './App.css';
 
 const 달력 = '마고력';
 // let 육십갑자 = '계묘';
-let 서기 = 2023;
-let 단기 = 서기 + 2333;
+let 서기 = new Date().getFullYear();
 let 환웅기원 = 서기 + 3898;
+let 단기 = 서기 + 2333;
 
 const 기준 = {
   마고력: {
@@ -48,10 +49,10 @@ function 시작요일(하늘, 땅) {
   return 요일 % 7;
 }
 
-function 개천부터세다() {
+function 초기화() {
   let 모든날 = [];
 
-  for(let 하늘 = 환웅기원 - 1; 하늘 < 환웅기원 + 40; 하늘++) {
+  for(let 하늘 = 환웅기원 - 100; 하늘 < 환웅기원 + 100; 하늘++) {
     모든날.push(한해를세다(하늘));
   }
 
@@ -123,7 +124,8 @@ function 하루를세다(하늘, 땅, 해, 달, 날, 판) {
   }
 
   return {
-    날짜: 날,
+    표시날짜: 날,
+    // 양력날짜: `${하늘}-${땅}-${날}`,
     설,
     휴일
   };
@@ -189,13 +191,13 @@ function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설�
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           // entry.target.style.backgroundColor = 'lightgreen';
-          // console.log(entry.target);
-          해설정(`${한달.날짜.해}년`);
+          
+          해설정(`${한달.날짜.해 - 1565}년`);
           if(한달.날짜.달 === 0) {
-            해설정(`${한달.날짜.해}(${한달.날짜.해 - 1})년`);
+            해설정(`${한달.날짜.해 - 1565}(${한달.날짜.해 - 1565 - 1})년`);
             달설정('정한달');
           } 
-          else 달설정(`${한달.날짜.달}월`);
+          else 달설정(`${한달.날짜.달}`);
         } else {
           // entry.target.style.backgroundColor = 'lightblue';
         }
@@ -218,9 +220,16 @@ function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설�
   }, [한달.날짜.해, 해, 한달.날짜.달, 달, 해설정, 달설정]);
 
   return (
-    <div key={순서} className='한달' style={style} ref={ref}>
-      {한달.한달.map((한주, 순서) => 한주를그리다(한주, 순서))}
-    </div>
+      <div
+        key={순서}
+        className='한달'
+        style={style}
+        ref={ref}
+        year={한달.날짜.해}
+        month={한달.날짜.달}
+      >
+        {한달.한달.map((한주, 순서) => 한주를그리다(한주, 순서))}
+      </div>
   );
 }
 
@@ -247,17 +256,10 @@ function 하루를그리다(하루, 순서) {
       className='하루'
       style={style}
     >
-      <div key={순서}>{하루.설 ? '설' : 하루.날짜}</div>
+      <div key={순서}>{하루.설 ? '설' : 하루.표시날짜}</div>
     </div>
   );
 }
-
-// function 오늘날짜구하기() {
-//   const 오늘인가 = new Date();
-//   const 오늘 = `${오늘인가.getFullYear()}년 ${오늘인가.getMonth() + 1}월 ${오늘인가.getDate()}일`;
-//   // console.log(오늘);
-//   return 오늘;
-// }
 
 function 요일구하기(날짜) {
   let 요일 = '';
@@ -295,21 +297,36 @@ function 요일구하기(날짜) {
 function App() {
   const [ 해, 해설정 ] = useState();
   const [ 달, 달설정 ] = useState(0);
-  // const [ 기준달력, 기준달력설정 ] = useState('마고력');
-  let [ data ] = useState(개천부터세다().flat());
-  const headerRef = useRef();
-  const listRef = useRef();
+  let [ data, setData ] = useState(초기화().flat());
+  const [ loading, setLoading ] = useState(false);
+  const [ selectedDate, setSelectedDate ] = useState(new Date());
+  const headerRef = useRef(null);
+  const listRef = useRef(null);
+
+  const 년 = new Date().getFullYear();
+  const 월 = new Date().getMonth() + 1;
 
   // console.log(data);
-  // gregory(2022, 9);
 
   useLayoutEffect(() => {
-    const instance = listRef.current;
-    if(instance) instance.scrollToItem(5);
-  }, []);
+    if(listRef.current) {
+      const index = data.findIndex(element => {
+          return element.날짜.해 - 3898 === 년 && element.날짜.달 === 월;
+        }
+      );
+      listRef.current.scrollToItem(index);
+    }
+  }, [listRef.current]);
+  // }, []);
 
   const scrollToday = useCallback(e => {
-    listRef.current.scrollToItem(5);
+    if(listRef.current) {
+      const index = data.findIndex(element => {
+          return element.날짜.해 - 3898 === 년 && element.날짜.달 === 월;
+        }
+      );
+      listRef.current.scrollToItem(index);
+    }
   }, []);
 
   return (
@@ -328,15 +345,37 @@ function App() {
 
           <button className='메뉴'>메뉴</button>
           
-          <h2 className='달력이름' style={{ alignSelf: 'center', margin: '0px auto' }}>
-            {달력}
-          </h2>
+          <div
+            className='달력이름'
+            style={{
+              alignSelf: 'center',
+              margin: '0px auto',
+              fontSize: 50,
+              fontWeight: 600,
+              color: 'orangered'
+            }}>
+            {달}
+          </div>
 
           <button className='오늘' onClick={scrollToday}>오늘</button>
 
         </div>
 
-        <h3>단기 {해} {달}</h3>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingLeft: '10px',
+            paddingRight: '10px'
+          }}
+        >
+
+          <div className='년월'>{parseInt(해) - 2333}년</div>
+
+          <div className='년월'>단기 {해}</div>
+
+        </div>
 
         <div className='요일'>
           { 소력().요.요일.map((날짜, 순서) => {
