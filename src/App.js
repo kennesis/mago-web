@@ -3,32 +3,16 @@ import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 // import getLunarMonth from './Lunar';
 // import * as _ from 'lodash';
+import addDays from 'date-fns/addDays';
 import './App.css';
 
-const 달력 = '마고력';
-// let 육십갑자 = '계묘';
 let 서기 = new Date().getFullYear();
 let 환웅기원 = 서기 + 3898;
-let 단기 = 서기 + 2333;
 
-const 기준 = {
-  마고력: {
-    해: 서기,
-    달: 13,
-    날: '설',
-  },
-  그레고리력: {
-    해: 서기,
-    달: 11,
-    날: 22
-  },
-  음력: {
-    해: 서기,
-    달: 10,
-    날: 10
-  },
-  절기: '소설'
-}
+let 양력 = new Date();
+양력.setFullYear(환웅기원 - 3898 - 51 - 1);
+양력.setMonth(10);
+양력.setDate(21);
 
 function 시작요일(하늘, 땅) {
   let 요일 = 0;
@@ -52,7 +36,7 @@ function 시작요일(하늘, 땅) {
 function 초기화() {
   let 모든날 = [];
 
-  for(let 하늘 = 환웅기원 - 50; 하늘 < 환웅기원 + 50; 하늘++) {
+  for(let 하늘 = 환웅기원 - 51; 하늘 < 환웅기원 + 15; 하늘++) {
     모든날.push(한해를세다(하늘));
   }
 
@@ -73,7 +57,7 @@ function 한달을세다(하늘, 땅) {
   let 한달 = [];
   let 판 = 0;
   let 날 = 0;
-  let 시작 = false;
+  let 시작 = false;  
 
   if(하늘 % 4 === 0 && 땅 === 0) {
     판 = 1;
@@ -117,15 +101,18 @@ function 하루를세다(하늘, 땅, 해, 달, 날, 판) {
   
   if(땅 === 0 && 해 === 0 && 달 === 시작요일(하늘, 땅) && 날 === 0) {
     설 = true;
+    양력 = addDays(양력, 1);
   }
 
   if(날 <= 0 || 날 > (소력().기.수 * 소력().요.수) + 판) {
     날 = null;
+  } else {
+    양력 = addDays(양력, 1);
   }
 
   return {
     표시날짜: 날,
-    // 양력날짜: `${하늘}-${땅}-${날}`,
+    양력날짜: 설 || 날 > 0 ? 양력 : null,
     설,
     휴일
   };
@@ -165,22 +152,6 @@ function 소력() {
   };
 }
 
-// function 모두그리다(모든날) {
-//   return (
-//     <div className='모든날'>
-//       {모든날.map((한해, 순서) => 한해를그리다(한해, 순서))}
-//     </div>
-//   );
-// }
-
-// function 한해를그리다(한해, 순서) {
-//   return (
-//     <div key={순서} className='한해'>
-//       {한해.map((한달, 순서) => 한달을그리다(한달, 순서))}
-//     </div>
-//   );
-// }
-
 function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설정) {
   const ref = useRef();
 
@@ -191,13 +162,8 @@ function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설�
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           // entry.target.style.backgroundColor = 'lightgreen';
-          
-          해설정(`${한달.날짜.해 - 1565}년`);
-          if(한달.날짜.달 === 0) {
-            해설정(`${한달.날짜.해 - 1565}(${한달.날짜.해 - 1565 - 1})년`);
-            달설정('정한달');
-          } 
-          else 달설정(`${한달.날짜.달}`);
+          해설정(한달.날짜.해);
+          달설정(한달.날짜.달);
         } else {
           // entry.target.style.backgroundColor = 'lightblue';
         }
@@ -242,12 +208,28 @@ function 한주를그리다(한주, 순서) {
 }
 
 function 하루를그리다(하루, 순서) {
-  let color = 'black';
+  const 년 = new Date().getFullYear();
+  const 월 = new Date().getMonth();
+  const 일 = new Date().getDate();
 
-  if(하루.설) color = 'red';
+  let color = 'black';
+  let border = '0px';
+
+  if(하루.설) {
+    color = 'red';
+  };
+
+  if(하루.양력날짜 && 하루.양력날짜.getFullYear() === 년 && 하루.양력날짜.getMonth() === 월 && 하루.양력날짜.getDate() === 일) {
+    border = '2px solid gray';
+  }
 
   const style = {
-    color
+    color,
+    border,
+    borderRadius: 5,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   }
 
   return (
@@ -257,6 +239,14 @@ function 하루를그리다(하루, 순서) {
       style={style}
     >
       <div key={순서}>{하루.설 ? '설' : 하루.표시날짜}</div>
+      <div style={{ fontSize: 13 }}>
+        {
+          하루.양력날짜 ? 
+          // `${하루.양력날짜.getFullYear()}.${하루.양력날짜.getMonth() + 1}.${하루.양력날짜.getDate()}` : 
+          `${하루.양력날짜.getMonth() + 1}.${하루.양력날짜.getDate()}` : 
+          null
+        }
+      </div>
     </div>
   );
 }
@@ -292,42 +282,40 @@ function 요일구하기(날짜) {
   return 요일;
 }
 
-// 오늘을 어떻게 알 것인가?
-
 function App() {
   const [ 해, 해설정 ] = useState();
   const [ 달, 달설정 ] = useState(0);
-  let [ data, setData ] = useState(초기화().flat());
-  const [ loading, setLoading ] = useState(false);
-  const [ selectedDate, setSelectedDate ] = useState(new Date());
+  let [ data ] = useState(초기화().flat());
+  // const [ loading, setLoading ] = useState(false);
+  // const [ selectedDate, setSelectedDate ] = useState(new Date());
   const headerRef = useRef(null);
   const listRef = useRef(null);
 
   const 년 = new Date().getFullYear();
-  const 월 = new Date().getMonth() + 1;
+  const 월 = new Date().getMonth();
+  const 일 = new Date().getDate();
 
   // console.log(data);
 
   useLayoutEffect(() => {
-    if(listRef.current) {
-      const index = data.findIndex(element => {
-          return element.날짜.해 - 3898 === 년 && element.날짜.달 === 월;
-        }
-      );
-      listRef.current.scrollToItem(index);
-    }
+    scrollToday();
   }, [listRef.current]);
-  // }, []);
 
   const scrollToday = useCallback(e => {
     if(listRef.current) {
       const index = data.findIndex(element => {
-          return element.날짜.해 - 3898 === 년 && element.날짜.달 === 월;
+          const index2 = element.한달.flat().findIndex(item => {
+            if(item.양력날짜) {
+              return item.양력날짜.getFullYear() === 년 && item.양력날짜.getMonth() === 월 && item.양력날짜.getDate() === 일;
+            }
+            else return false;
+          })
+          return index2 >= 0;
         }
-      );
+      );  
       listRef.current.scrollToItem(index);
     }
-  }, []);
+  }, [data, 년, 월, 일]);
 
   return (
     <div className='달력'>
@@ -345,17 +333,9 @@ function App() {
 
           <button className='메뉴'>메뉴</button>
           
-          <div
-            className='달력이름'
-            style={{
-              alignSelf: 'center',
-              margin: '0px auto',
-              fontSize: 50,
-              fontWeight: 600,
-              color: 'orangered'
-            }}>
-            {달}
-          </div>
+          <h1 className='달'>
+            {달 === 0 ? '정한달' : 달}
+          </h1>
 
           <button className='오늘' onClick={scrollToday}>오늘</button>
 
@@ -371,9 +351,9 @@ function App() {
           }}
         >
 
-          <div className='년월'>{parseInt(해) - 2333}년</div>
+          <div className='년월'>{달 === 0 ? `${해 - 3898}(${해 - 3898 - 1})` : `${해 - 3898}`}년</div>
 
-          <div className='년월'>단기 {해}</div>
+          <div className='년월'>단기 {달 === 0 ? `${해 - 1565}(${해 - 1565 - 1})` : `${해 - 1565}`}년</div>
 
         </div>
 
