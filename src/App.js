@@ -183,7 +183,7 @@ function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설�
     return () => {
       observer.unobserve(instance);
     };
-  }, [한달.날짜.해, 해, 한달.날짜.달, 달, 해설정, 달설정]);
+  }, [한달.날짜.해, 한달.날짜.달, 해설정, 달설정]);
 
   return (
       <div
@@ -333,9 +333,9 @@ function App() {
 
           <button className='메뉴'>메뉴</button>
           
-          <h1 className='달'>
+          <h2 className='달'>
             {달 === 0 ? '정한달' : 달}
-          </h1>
+          </h2>
 
           <button className='오늘' onClick={scrollToday}>오늘</button>
 
