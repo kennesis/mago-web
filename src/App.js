@@ -7,10 +7,10 @@ import addDays from 'date-fns/addDays';
 import './App.css';
 
 let 서기 = new Date().getFullYear();
-let 환웅기원 = 서기 + 3898;
+let 단기 = 서기 + 2333;
 
 let 양력 = new Date();
-양력.setFullYear(환웅기원 - 3898 - 51 - 1);
+양력.setFullYear(단기 - 2333 - 72 - 1);
 양력.setMonth(10);
 양력.setDate(21);
 
@@ -18,25 +18,25 @@ function 시작요일(하늘, 땅) {
   let 요일 = 0;
 
   for(let i = 1; i <= 하늘; i++) {
-    if(i % 4 === 0) {
+    if(i % 4 === 1) {
       요일 += 2;
     }
     else 요일 += 1;
   }
 
-  if(하늘 % 4 === 0) {
+  if(하늘 % 4 === 1) {
     if(땅 > 0) 요일 += 1;
   } else {
     요일 += 1;
   }
 
-  return 요일 % 7;
+  return (요일 + 2) % 7;
 }
 
 function 초기화() {
   let 모든날 = [];
 
-  for(let 하늘 = 환웅기원 - 51; 하늘 < 환웅기원 + 15; 하늘++) {
+  for(let 하늘 = 단기 - 72; 하늘 < 단기 + 15; 하늘++) {
     모든날.push(한해를세다(하늘));
   }
 
@@ -59,7 +59,7 @@ function 한달을세다(하늘, 땅) {
   let 날 = 0;
   let 시작 = false;  
 
-  if(하늘 % 4 === 0 && 땅 === 0) {
+  if(하늘 % 4 === 1 && 땅 === 0) {
     판 = 1;
   }
 
@@ -109,6 +109,8 @@ function 하루를세다(하늘, 땅, 해, 달, 날, 판) {
   } else {
     양력 = addDays(양력, 1);
   }
+
+  // if(설) console.log(양력);
 
   return {
     표시날짜: 날,
@@ -334,7 +336,7 @@ function App() {
           <button className='메뉴'>메뉴</button>
           
           <h2 className='달'>
-            {달 === 0 ? '정한달' : 달}
+            {달 === 0 ? '정한달' : 달 + '월'}
           </h2>
 
           <button className='오늘' onClick={scrollToday}>오늘</button>
@@ -351,9 +353,9 @@ function App() {
           }}
         >
 
-          <div className='년월'>{달 === 0 ? `${해 - 3898}(${해 - 3898 - 1})` : `${해 - 3898}`}년</div>
+          <div className='년월'>{달 === 0 ? `${해 - 2333}(${해 - 2333 - 1})` : `${해 - 2333}`}년</div>
 
-          <div className='년월'>단기 {달 === 0 ? `${해 - 1565}(${해 - 1565 - 1})` : `${해 - 1565}`}년</div>
+          <div className='년월'>단기 {달 === 0 ? `${해}(${해 - 1})` : `${해}`}년</div>
 
         </div>
 
