@@ -1,157 +1,226 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
-// import getLunarMonth from './Lunar';
-// import * as _ from 'lodash';
-import addDays from 'date-fns/addDays';
+import { addDays, setYear, setMonth, setDate } from 'date-fns';
+// import { countSolarTerms } from './Lunar-main/src/index.ts';
 import './App.css';
+import Week from './Components/Week';
+const holidayKR = require('holiday-kr');
+
+const 사 = 13;
+const 기 = 4;
+const 요 = 7;
 
 let 서기 = new Date().getFullYear();
 let 단기 = 서기 + 2333;
 
-let 양력 = new Date();
-양력.setFullYear(단기 - 2333 - 72 - 1);
-양력.setMonth(10);
-양력.setDate(21);
+function 판(년) {
+  return 년 % 4 === 1;
+}
 
-function 시작요일(하늘, 땅) {
+function 시작요일(년, 월) {
   let 요일 = 0;
 
-  for(let i = 1; i <= 하늘; i++) {
-    if(i % 4 === 1) {
+  for(let i = 1; i <= 년; i++) {
+    if(판(i)) {
       요일 += 2;
     }
     else 요일 += 1;
   }
 
-  if(하늘 % 4 === 1) {
-    if(땅 > 0) 요일 += 1;
+  if(판(년)) {
+    if(월 > 0) 요일 += 1;
   } else {
     요일 += 1;
   }
 
-  return (요일 + 2) % 7;
+  return (요일 + 2) % 요;
 }
 
-function 초기화() {
-  let 모든날 = [];
+function 양력휴일구하기(양력) {
+  const 년 = 양력.getFullYear();
+  const 월 = 양력.getMonth() + 1;
+  const 일 = 양력.getDate();
 
-  for(let 하늘 = 단기 - 72; 하늘 < 단기 + 15; 하늘++) {
-    모든날.push(한해를세다(하늘));
+  if(월 === 1 && 일 === 1) return '신정';
+  else if(월 === 3 && 일 === 1) return '삼일절';
+  else if(월 === 5 && 일 === 5) return '어린이날';
+  else if(월 === 6 && 일 === 6) return '현충일';
+  else if(월 === 8 && 일 === 15) return '광복절';
+  else if(월 === 10 && 일 === 3) return '개천절';
+  else if(월 === 10 && 일 === 9) return '한글날';
+  else if(월 === 12 && 일 === 25) return '성탄절';
+  else if(년 === 2024 && 월 === 4 && 일 === 10) return '22대 국회의원선거';
+  else return null;
+}
+
+function 음력휴일구하기(양력, 음력) {
+  function 설날전날구하기() {
+    const seolnal = holidayKR.getSolar(양력.getFullYear(), 1, 1, 음력.isLeapMonth);
+    const 설날 = new Date(seolnal.year, seolnal.month - 1, seolnal.day);
+    const 오늘 = new Date(양력.getFullYear(), 양력.getMonth(), 양력.getDate());
+    return 오늘.getTime() === 설날.getTime() - 86400000;
+  }
+  
+  if(설날전날구하기()) return ' ';
+  else if(음력.month === 1 && 음력.day === 1) return '설날';  
+  else if(음력.month === 1 && 음력.day === 2) return ' ';
+  else if(음력.month === 4 && 음력.day === 8) return '부처님오신날';
+  else if(음력.month === 8 && 음력.day === 14) return ' ';
+  else if(음력.month === 8 && 음력.day === 15) return '한가위';
+  else if(음력.month === 8 && 음력.day === 16) return ' ';
+  else return null;
+}
+
+function 대체휴일구하기(양력, 음력) {
+  const 년 = 양력.getFullYear();
+  const 월 = 양력.getMonth() + 1;
+  const 일 = 양력.getDate();
+  // const 요일 = 양력.getDay();
+
+  if(음력.month === 1 && 음력.day === 3) {
+    if(음력.dayOfWeek === '월') return '대체휴일';
+    else if(음력.dayOfWeek === '화') return '대체휴일';
+    else if(음력.dayOfWeek === '수') return '대체휴일';
+  }
+  if(음력.month === 8 && 음력.day === 17) {
+    if(음력.dayOfWeek === '월') return '대체휴일';
+    else if(음력.dayOfWeek === '화') return '대체휴일';
+    else if(음력.dayOfWeek === '수') return '대체휴일';
+  }
+  if(년 === 2028 && 월 === 10 && 일 === 5) return '대체휴일';
+}
+
+function 임시공휴일구하기(양력) {
+  const 년 = 양력.getFullYear();
+  const 월 = 양력.getMonth() + 1;
+  const 일 = 양력.getDate();
+
+  if(년 === 2023 && 월 === 10 && 일 === 2) return '임시공휴일';
+  if(년 === 2020 && 월 === 8 && 일 === 17) return '임시공휴일';
+  if(년 === 2017 && 월 === 10 && 일 === 2) return '임시공휴일';
+  if(년 === 2017 && 월 === 5 && 일 === 9) return '임시공휴일';
+  if(년 === 2016 && 월 === 5 && 일 === 6) return '임시공휴일';
+  if(년 === 2015 && 월 === 8 && 일 === 14) return '임시공휴일';
+  if(년 === 2002 && 월 === 7 && 일 === 1) return '임시공휴일';
+
+}
+
+function 기념일구하기(양력, 음력) {
+  // const 년 = 양력.getFullYear();
+  const 월 = 양력.getMonth() + 1;
+  const 일 = 양력.getDate();
+
+  if(월 === 3 && 일 === 3) return '삼월삼짓날';
+  else if(월 === 4 && 일 === 5) return '식목일';
+  else if(월 === 5 && 일 === 8) return '어버이날';
+  else if(월 === 5 && 일 === 15) return '스승의날';
+  else if(월 === 7 && 일 === 17) return '제헌절';
+  else if(음력.month === 9 && 음력.day === 9) return '구월귀일';
+}
+
+function 한해를세다(년, 오늘) {
+
+  let 한해 = [];
+  // TODO 기준 날짜를 정하기
+  let 양력 = setDate(setMonth(setYear(오늘, 년 - 2333 - 1), 10), 21);
+  // const 절기들 = countSolarTerms(양력, addDays(setYear(양력, 년 - 2333), 2));
+
+  function 한달을세다(월) {
+
+    let 한달 = [];
+    let 시작 = false;
+
+    function 하루를세다(주, 일) {
+      const 하루 = {};
+      let 날 = (주 * 요) + 일 - 시작요일(년, 월);
+      
+      if(월 === 0 && 주 === 0 && 일 === 시작요일(년, 월) && 날 === 0) {
+        하루.설 = true;
+        양력 = addDays(양력, 1);
+
+        const 음력 = holidayKR.getLunar(양력);
+        
+        하루.음력 = `음${음력.month}.${음력.day}`;
+      }
+    
+      if(날 <= 0 || 날 > (기 * 요) + (판(년) && 월 === 0 ? 1 : 0)) {
+        날 = null;
+      } else {
+        양력 = addDays(양력, 1);
+
+        const 음력 = holidayKR.getLunar(양력);
+        
+        if(!(월 === 0) && 날 === 1) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.day === 1) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.day === 15) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.month === 4 && 음력.day === 8) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.month === 9 && 음력.day === 9) 하루.음력 = `음${음력.month}.${음력.day}`;
+
+        const 양력휴일 = 양력휴일구하기(양력);
+        const 음력휴일 = 음력휴일구하기(양력, 음력);
+        const 대체휴일 = 대체휴일구하기(양력, 음력);
+        const 임시공휴일 = 임시공휴일구하기(양력);
+        const 기념일 = 기념일구하기(양력, 음력);
+
+        if(양력휴일) 하루.양력휴일 = 양력휴일;
+        if(음력휴일) 하루.음력휴일 = 음력휴일;
+        if(대체휴일) 하루.대체휴일 = 대체휴일;
+        if(임시공휴일) 하루.임시공휴일 = 임시공휴일;
+        if(기념일) 하루.기념일 = 기념일;
+      }
+
+      if(날 && 양력.getFullYear() === 오늘.getFullYear() && 양력.getMonth() === 오늘.getMonth() && 양력.getDate() === 오늘.getDate()) {
+        하루.선택날짜 = true;
+      }
+    
+      하루.표시날짜 = 날;
+      하루.양력날짜 = (하루.설 || 날 > 0) && 날 <= (기 * 요) + (판(년) && 월 === 0 ? 1 : 0) ? 양력 : null;
+
+      // TODO 하루마다 찾는 것이 아닌 데이터에 병합시키기.
+      // const 절기 = 절기들.find(item => 양력.getFullYear() === item.date.getFullYear() && 양력.getMonth() === item.date.getMonth() && 양력.getDate() === item.date.getDate());
+
+      // if(절기 && 하루.양력날짜) 하루.절기 = 절기.label;
+    
+      return 하루;
+    }
+  
+    let 추가열 = 시작요일(년, 월) === 6 && 판(년);
+  
+    for(let 주 = 0; 주 <= 4 + 추가열; 주++) {
+      let 한주 = [];
+  
+      for(let 일 = 0; 일 < 요; 일++) {
+
+        if(주 === 0 && !시작) {
+          if(일 === 시작요일(년, 월)) {
+            시작 = true;
+          } else {
+            한주.push(하루를세다(주, 일));
+            continue;
+          }
+        }
+  
+        한주.push(하루를세다(주, 일));
+      }
+  
+      한달.push(한주);
+    }
+  
+    return {
+      한달,
+      날짜: {
+        해: 년,
+        달: 월
+      }
+    };
   }
 
-  return 모든날;
-}
-
-function 한해를세다(하늘) {
-  let 한해 = [];
-
-  for(let 땅 = 0; 땅 < 소력().사.수; 땅++) {
-    한해.push(한달을세다(하늘, 땅));
+  for(let 월 = 0; 월 < 사; 월++) {
+    한해.push(한달을세다(월));
   }
 
   return 한해;
-}
-
-function 한달을세다(하늘, 땅) {
-  let 한달 = [];
-  let 판 = 0;
-  let 날 = 0;
-  let 시작 = false;  
-
-  if(하늘 % 4 === 1 && 땅 === 0) {
-    판 = 1;
-  }
-
-  let 추가열 = 시작요일(하늘, 땅) === 6 && 판 === 1 ? true : false;
-
-  for(let 해 = 0; 해 <= 소력().기.수 + 추가열; 해++) {
-    let 한주 = [];
-
-    for(let 달 = 0; 달 < 소력().요.수; 달++) {
-      if(해 === 0 && !시작) {
-        if(달 === 시작요일(하늘, 땅)) {
-          시작 = true;
-        } else {
-          한주.push(하루를세다(하늘, 땅, 해, 달, 날, 판));
-          continue;
-        }
-      }
-
-      한주.push(하루를세다(하늘, 땅, 해, 달, 날, 판));
-      날++;
-
-    }
-
-    한달.push(한주);
-  }
-
-  return {
-    한달,
-    날짜: {
-      해: 하늘,
-      달: 땅
-    }
-  };
-}
-
-function 하루를세다(하늘, 땅, 해, 달, 날, 판) {
-  let 휴일 = false;
-  let 설 = false;
-  
-  if(땅 === 0 && 해 === 0 && 달 === 시작요일(하늘, 땅) && 날 === 0) {
-    설 = true;
-    양력 = addDays(양력, 1);
-  }
-
-  if(날 <= 0 || 날 > (소력().기.수 * 소력().요.수) + 판) {
-    날 = null;
-  } else {
-    양력 = addDays(양력, 1);
-  }
-
-  // if(설) console.log(양력);
-
-  return {
-    표시날짜: 날,
-    양력날짜: 설 || 날 > 0 ? 양력 : null,
-    설,
-    휴일
-  };
-}
-
-function 소력() {
-  const 사 = {
-    이름: '년',
-    수: 13
-  };
-  const 기 = {
-    이름: '월',
-    수: 4
-  };
-  const 요 = {
-    이름: '일',
-    수: 7,
-    요일: [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
-  };
-  const 복 = {
-    호칭: '요의 끝'
-  }
-
-  return {
-    사,
-    기,
-    요,
-    복
-  };
 }
 
 function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설정) {
@@ -196,112 +265,41 @@ function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설�
         year={한달.날짜.해}
         month={한달.날짜.달}
       >
-        {한달.한달.map((한주, 순서) => 한주를그리다(한주, 순서))}
+        {한달.한달.map((한주, 순서) => <Week 한주={한주} 순서={순서}/>)}
       </div>
   );
-}
-
-function 한주를그리다(한주, 순서) {
-  return (
-    <div key={순서} className='한주'>
-        {한주.map((하루, 순서) => 하루를그리다(하루, 순서))}
-    </div>
-  );
-}
-
-function 하루를그리다(하루, 순서) {
-  const 년 = new Date().getFullYear();
-  const 월 = new Date().getMonth();
-  const 일 = new Date().getDate();
-
-  let color = 'black';
-  let border = '0px';
-
-  if(하루.설) {
-    color = 'red';
-  };
-
-  if(하루.양력날짜 && 하루.양력날짜.getFullYear() === 년 && 하루.양력날짜.getMonth() === 월 && 하루.양력날짜.getDate() === 일) {
-    border = '2px solid gray';
-  }
-
-  const style = {
-    color,
-    border,
-    borderRadius: 5,
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center'
-  }
-
-  return (
-    <div
-      key={순서}
-      className='하루'
-      style={style}
-    >
-      <div key={순서}>{하루.설 ? '설' : 하루.표시날짜}</div>
-      <div style={{ fontSize: 13 }}>
-        {
-          하루.양력날짜 ? 
-          // `${하루.양력날짜.getFullYear()}.${하루.양력날짜.getMonth() + 1}.${하루.양력날짜.getDate()}` : 
-          `${하루.양력날짜.getMonth() + 1}.${하루.양력날짜.getDate()}` : 
-          null
-        }
-      </div>
-    </div>
-  );
-}
-
-function 요일구하기(날짜) {
-  let 요일 = '';
-  switch (날짜) {
-    case 0:
-      요일 = '해';
-      break;
-    case 1:
-      요일 = '달';
-      break;
-    case 2:
-      요일 = '화성';
-      break;
-    case 3:
-      요일 = '수성';
-      break;
-    case 4:
-      요일 = '목성';
-      break;
-    case 5:
-      요일 = '금성';
-      break;
-    case 6:
-      요일 = '토성';
-      break;
-  
-    default:
-      break;
-  }
-  return 요일;
 }
 
 function App() {
-  const [ 해, 해설정 ] = useState();
-  const [ 달, 달설정 ] = useState(0);
-  let [ data ] = useState(초기화().flat());
-  // const [ loading, setLoading ] = useState(false);
-  // const [ selectedDate, setSelectedDate ] = useState(new Date());
+
+  const 오늘 = new Date();
+  const 년 = 오늘.getFullYear();
+  const 월 = 오늘.getMonth();
+  const 일 = 오늘.getDate();
+
+  const [ data ] = useState(() => {
+    return 한해를세다(단기, new Date()).flat();
+  });
+
+  const findToday = useCallback(e => {
+    const today = data?.find(element => {
+        const today2 = element.한달.flat().find(item => {
+          if(item.양력날짜) {
+            return item.양력날짜.getFullYear() === 년 && item.양력날짜.getMonth() === 월 && item.양력날짜.getDate() === 일;
+          }
+          else return null;
+        })
+        return today2;
+      }
+    );
+    return today;
+  }, [ data, 년, 월, 일 ]);
+
+  const [ 해, 해설정 ] = useState(findToday().날짜.해);
+  const [ 달, 달설정 ] = useState(findToday().날짜.달);
+  
   const headerRef = useRef(null);
   const listRef = useRef(null);
-
-  const 년 = new Date().getFullYear();
-  const 월 = new Date().getMonth();
-  const 일 = new Date().getDate();
-
-  // console.log(data);
-
-  useLayoutEffect(() => {
-    scrollToday();
-  }, [listRef.current]);
 
   const scrollToday = useCallback(e => {
     if(listRef.current) {
@@ -318,6 +316,10 @@ function App() {
       listRef.current.scrollToItem(index);
     }
   }, [data, 년, 월, 일]);
+
+  useEffect(() => {
+    scrollToday();
+  }, [ scrollToday ]);
 
   return (
     <div className='달력'>
@@ -353,19 +355,18 @@ function App() {
           }}
         >
 
-          <div className='년월'>{달 === 0 ? `${해 - 2333}(${해 - 2333 - 1})` : `${해 - 2333}`}년</div>
+          <div className='년월'>단기 {달 === 0 ? `${해}(${해 - 1})` : 해}년</div>
 
-          <div className='년월'>단기 {달 === 0 ? `${해}(${해 - 1})` : `${해}`}년</div>
+          <div className='년월'>{달 === 0 ? `${해 - 2333}(${해 - 1 - 2333})` : 해 - 2333}년</div>
 
         </div>
 
         <div className='요일'>
-          { 소력().요.요일.map((날짜, 순서) => {
-            const 요일 = 요일구하기(날짜);
-            let color = 'black';
+          { ['해', '달', '화성', '수성', '목성', '금성', '토성'].map((요일, 순서) => {
+            let color;
 
-            if(요일 === '해') color = 'red';
-            else if(요일 === '토성') color = 'blue';
+            if(순서 === 0) color = 'rgba(255, 0, 0, 0.7)';
+            else if(순서 === 6) color = 'cornflowerblue';
             
             const style = {
               color,
@@ -373,7 +374,7 @@ function App() {
               textAlign: 'center'
             }
 
-            return <div key={순서} style={style}>{요일구하기(날짜)}</div>;
+            return <div key={순서} style={style}>{요일}</div>;
           }) }
         </div>
 

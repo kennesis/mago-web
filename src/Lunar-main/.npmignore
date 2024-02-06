@@ -1,0 +1,13 @@
+src
+
+.github
+.husky
+.vscode
+.eslintrc.json
+.lintstagedrc.json
+.prettierrc
+jestconfig.json
+package-lock.json
+tsconfig.json
+tsconfig.spec.json
+tsconfig.src.json

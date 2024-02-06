@@ -1,0 +1,56 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "tsconfigRootDir": "./",
+    "project": "./tsconfig.json",
+    "warnOnUnsupportedTypeScriptVersion": false,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": false,
+    "node": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "standard-with-typescript",
+    "prettier"
+  ],
+  "plugins": ["@typescript-eslint", "prettier"],
+  "overrides": [
+    {
+      "files": ["*.ts"]
+    }
+  ],
+  "rules": {
+    "comma-dangle": ["error", "never"],
+    "eqeqeq": ["off"],
+    "no-array-constructor": "off",
+    "object-shorthand": ["error", "never"],
+    "semi": ["error", "always"],
+    "space-before-function-paren": ["error", "never"],
+    "@typescript-eslint/array-type": ["error", {
+      "default": "generic",
+      "readonly": "generic"
+    }],
+    "@typescript-eslint/consistent-type-imports": "off",
+    "@typescript-eslint/comma-dangle": ["error", "never"],
+    "@typescript-eslint/no-array-constructor": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/require-array-sort-compare": "warn",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/semi": "off",
+    "@typescript-eslint/space-before-function-paren": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off"
+  }
+}

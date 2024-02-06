@@ -1,0 +1,10 @@
+{
+  "bail": true,
+  "notifyMode": "always",
+  "transform": {
+    "^.+\\.(t|j)sx?$": "ts-jest"
+  },
+  "testRegex": "(/.*|(\\.|/))\\.spec\\.ts$",
+  "moduleFileExtensions": ["js", "ts"],
+  "rootDir": "./src"
+}
