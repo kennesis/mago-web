@@ -112,11 +112,20 @@ function 기념일구하기(양력, 음력) {
   const 일 = 양력.getDate();
 
   if(월 === 3 && 일 === 3) return '삼월삼짓날';
-  else if(월 === 4 && 일 === 5) return '식목일';
+  else if(월 === 4 && 일 === 5) return '한식, 식목일';
   else if(월 === 5 && 일 === 8) return '어버이날';
   else if(월 === 5 && 일 === 15) return '스승의날';
   else if(월 === 7 && 일 === 17) return '제헌절';
+  else if(음력.month === 7 && 음력.day === 7) return '음 칠월칠석';
   else if(음력.month === 9 && 음력.day === 9) return '구월귀일';
+}
+
+function 명절구하기(월, 날) {
+  if(월 === 5 && 날 === 5) return '단오';
+  if(월 === 6 && 날 === 15) return '물맞이날, 유두절';
+  if(월 === 7 && 날 === 7) return '칠월칠석';
+  if(월 === 7 && 날 === 15) return '백중';
+  if(월 === 10 && 날 === 3) return '개천';
 }
 
 function 달이름(달) {
@@ -124,29 +133,29 @@ function 달이름(달) {
     case 0:
       return '정한달';
     case 1:
-      return '1월 해오름달';
+      return '1월';
     case 2:
-      return '2월 시샘달';
+      return '2월';
     case 3:
-      return '3월 물오름달';
+      return '3월';
     case 4:
-      return '4월 잎새달';
+      return '4월';
     case 5:
-      return '5월 푸른달';
+      return '5월';
     case 6:
-      return '6월 누리달';
+      return '6월';
     case 7:
-      return '7월 견우직녀달';
+      return '7월';
     case 8:
-      return '8월 타오름달';
+      return '8월';
     case 9:
-      return '9월 열매달';
+      return '9월';
     case 10:
-      return '10월 하늘연달';
+      return '10월';
     case 11:
-      return '11월 마름달';
+      return '11월';
     case 12:
-      return '12월 매듭달';
+      return '12월';
     default:
       return 달;
   }
@@ -189,19 +198,22 @@ function 한해를세다(년, 오늘) {
         if(음력.day === 1) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.day === 15) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.month === 4 && 음력.day === 8) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.month === 7 && 음력.day === 7) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.month === 9 && 음력.day === 9) 하루.음력 = `음${음력.month}.${음력.day}`;
 
         const 양력휴일 = 양력휴일구하기(양력);
         const 음력휴일 = 음력휴일구하기(양력, 음력);
         const 대체휴일 = 대체휴일구하기(양력, 음력);
         const 임시공휴일 = 임시공휴일구하기(양력);
-        const 기념일 = 기념일구하기(양력, 음력);
+        const 기념일 = 기념일구하기(양력, 음력, 월, 날);
+        const 명절 = 명절구하기(월, 날);
 
         if(양력휴일) 하루.양력휴일 = 양력휴일;
         if(음력휴일) 하루.음력휴일 = 음력휴일;
         if(대체휴일) 하루.대체휴일 = 대체휴일;
         if(임시공휴일) 하루.임시공휴일 = 임시공휴일;
         if(기념일) 하루.기념일 = 기념일;
+        if(명절) 하루.명절 = 명절;
       }
 
       if(날 && 양력.getFullYear() === 오늘.getFullYear() && 양력.getMonth() === 오늘.getMonth() && 양력.getDate() === 오늘.getDate()) {

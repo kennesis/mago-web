@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 
 function Day({ 하루, 순서 }) {
     // console.log(표시날짜);
-    const { 설, 표시날짜, 양력날짜, 음력, 양력휴일, 음력휴일, 대체휴일, 임시공휴일, 기념일, 절기, 선택날짜 } = 하루;
+    const { 설, 표시날짜, 양력날짜, 음력, 양력휴일, 음력휴일, 대체휴일, 임시공휴일, 기념일, 명절, 절기, 선택날짜 } = 하루;
 
     let color = 'black';
     let border = '0px';
@@ -44,8 +44,9 @@ function Day({ 하루, 순서 }) {
             {음력휴일 && <div style={{ color, fontSize: 11 }}>{음력휴일}</div>}
             {대체휴일 && <div style={{ color, fontSize: 11 }}>{대체휴일}</div>}
             {임시공휴일 && <div style={{ color, fontSize: 11 }}>{임시공휴일}</div>}
-            {절기 && <div style={{ color, fontSize: 11 }}>{절기}</div>}
-            {기념일 && <div style={{ color, fontSize: 11 }}>{기념일}</div>}
+            {명절 && <div style={{ color: 'rgba(255, 0, 0, 0.8)', fontSize: 14 }}>{명절}</div>}
+            {절기 && <div style={{ color, fontSize: 14 }}>{절기}</div>}
+            {기념일 && <div style={{ color, fontSize: 14 }}>{기념일}</div>}
         </div>
     );
 }
