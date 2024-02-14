@@ -119,6 +119,40 @@ function 기념일구하기(양력, 음력) {
   else if(음력.month === 9 && 음력.day === 9) return '구월귀일';
 }
 
+function 달이름(달) {
+  switch (달) {
+    case 0:
+      return '정한달';
+    case 1:
+      return '1월 해오름달';
+    case 2:
+      return '2월 시샘달';
+    case 3:
+      return '3월 물오름달';
+    case 4:
+      return '4월 잎새달';
+    case 5:
+      return '5월 푸른달';
+    case 6:
+      return '6월 누리달';
+    case 7:
+      return '7월 견우직녀달';
+    case 8:
+      return '8월 타오름달';
+    case 9:
+      return '9월 열매달';
+    case 10:
+      return '10월 하늘연달';
+    case 11:
+      return '11월 마름달';
+    case 12:
+      return '12월 매듭달';
+    default:
+      return 달;
+  }
+  
+}
+
 function 한해를세다(년, 오늘) {
 
   let 한해 = [];
@@ -338,7 +372,7 @@ function App() {
           <button className='메뉴'>메뉴</button>
           
           <h2 className='달'>
-            {달 === 0 ? '정한달' : 달 + '월'}
+            {달이름(달)}
           </h2>
 
           <button className='오늘' onClick={scrollToday}>오늘</button>
