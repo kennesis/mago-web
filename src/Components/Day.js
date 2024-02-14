@@ -40,10 +40,10 @@ function Day({ 하루, 순서 }) {
             }  
             </div>
             {음력 && <div style={{ color, fontSize: 11 }}>{음력}</div>}                
-            {양력휴일 && <div style={{ color, fontSize: 11 }}>{양력휴일}</div>}
-            {음력휴일 && <div style={{ color, fontSize: 11 }}>{음력휴일}</div>}
-            {대체휴일 && <div style={{ color, fontSize: 11 }}>{대체휴일}</div>}
-            {임시공휴일 && <div style={{ color, fontSize: 11 }}>{임시공휴일}</div>}
+            {양력휴일 && <div style={{ color, fontSize: 14 }}>{양력휴일}</div>}
+            {음력휴일 && <div style={{ color, fontSize: 14 }}>{음력휴일}</div>}
+            {대체휴일 && <div style={{ color, fontSize: 14 }}>{대체휴일}</div>}
+            {임시공휴일 && <div style={{ color, fontSize: 14 }}>{임시공휴일}</div>}
             {명절 && <div style={{ color: 'rgba(255, 0, 0, 0.8)', fontSize: 14 }}>{명절}</div>}
             {절기 && <div style={{ color, fontSize: 14 }}>{절기}</div>}
             {기념일 && <div style={{ color, fontSize: 14 }}>{기념일}</div>}
