@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useId, useRef, useEffect, memo } from 'react';
 import Week from './Week';
 
 function Month({ 한달, 순서, style, 해설정, 달설정 }) {
     const ref = useRef();
+    const id = useId();
   
     useEffect(() => {
       const instance = ref.current;
@@ -36,14 +37,14 @@ function Month({ 한달, 순서, style, 해설정, 달설정 }) {
   
     return (
         <div
-          key={`month${순서}`}
+          key={`month${순서}${id}`}
           className='한달'
-          style={style}
+          style={{ ...style, gridTemplateRows: `repeat(${한달.한달.length}, 1fr)` }}
           ref={ref}
           year={한달.날짜.해}
           month={한달.날짜.달}
         >
-          {한달.한달.map((한주, 순서) => <Week key={`week${순서}`} 한주={한주} 순서={순서}/>)}
+          {한달.한달.map((한주, 순서) => <Week key={`week${순서}${id}`} 한주={한주} 순서={순서} />)}
         </div>
     );
   }

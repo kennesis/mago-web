@@ -114,6 +114,7 @@ function 기념일구하기(양력, 음력) {
 
   if(월 === 3 && 일 === 3) return '삼월삼짓날';
   else if(월 === 4 && 일 === 5) return '한식, 식목일';
+  else if(월 === 5 && 일 === 1) return '근로자의날';
   else if(월 === 5 && 일 === 8) return '어버이날';
   else if(월 === 5 && 일 === 15) return '스승의날';
   else if(월 === 7 && 일 === 17) return '제헌절';
@@ -121,12 +122,14 @@ function 기념일구하기(양력, 음력) {
   else if(음력.month === 9 && 음력.day === 9) return '구월귀일';
 }
 
-function 명절구하기(월, 날) {
+function 명절구하기(음력, 월, 날) {
   if(월 === 5 && 날 === 5) return '단오';
-  if(월 === 6 && 날 === 15) return '물맞이날, 유두절';
-  if(월 === 7 && 날 === 7) return '칠월칠석';
-  if(월 === 7 && 날 === 15) return '백중';
-  if(월 === 10 && 날 === 3) return '개천';
+  else if(월 === 6 && 날 === 15) return '물맞이날, 유두절';
+  else if(월 === 7 && 날 === 7) return '칠월칠석';
+  else if(월 === 7 && 날 === 15) return '백중';
+  else if(월 === 10 && 날 === 3) return '개천';
+  else if(음력.month === 3 && 음력.day === 15) return '어천절';
+  else if(음력.month === 3 && 음력.day === 16) return '본 어천절';
 }
 
 function 달이름(달) {
@@ -197,6 +200,8 @@ function 한해를세다(년, 오늘) {
         if(!(월 === 0) && 날 === 1) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.day === 1) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.day === 15) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.month === 3 && 음력.day === 15) 하루.음력 = `음${음력.month}.${음력.day}`;
+        if(음력.month === 3 && 음력.day === 16) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.month === 4 && 음력.day === 8) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.month === 7 && 음력.day === 7) 하루.음력 = `음${음력.month}.${음력.day}`;
         if(음력.month === 9 && 음력.day === 9) 하루.음력 = `음${음력.month}.${음력.day}`;
@@ -206,7 +211,7 @@ function 한해를세다(년, 오늘) {
         const 대체휴일 = 대체휴일구하기(양력, 음력);
         const 임시공휴일 = 임시공휴일구하기(양력);
         const 기념일 = 기념일구하기(양력, 음력, 월, 날);
-        const 명절 = 명절구하기(월, 날);
+        const 명절 = 명절구하기(음력, 월, 날);
 
         if(양력휴일) 하루.양력휴일 = 양력휴일;
         if(음력휴일) 하루.음력휴일 = 음력휴일;
@@ -405,7 +410,16 @@ function App() {
             // onScroll={handleScroll}
           >
             {({ data, index, style }) => {
-              return <Month key={`month${index}`} 한달={data[index]} 순서={index} style={style} 해설정={해설정} 달설정={달설정}/>;
+              return (
+                <Month
+                  key={`month${index}`}
+                  한달={data[index]}
+                  순서={index}
+                  style={style}
+                  해설정={해설정}
+                  달설정={달설정}
+                />
+              );
             }}
           </List>
         )}
