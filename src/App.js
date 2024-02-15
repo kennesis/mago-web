@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { addDays, setYear, setMonth, setDate } from 'date-fns';
-// import { countSolarTerms } from './Lunar-main/src/index.ts';
+import getSolarTerms from './SolarTerms';
 import './App.css';
-import Week from './Components/Week';
+import Month from './Components/Month';
 const holidayKR = require('holiday-kr');
 
 const 사 = 13;
@@ -76,7 +76,7 @@ function 대체휴일구하기(양력, 음력) {
   const 년 = 양력.getFullYear();
   const 월 = 양력.getMonth() + 1;
   const 일 = 양력.getDate();
-  // const 요일 = 양력.getDay();
+  const 요일 = 양력.getDay();
 
   if(음력.month === 1 && 음력.day === 3) {
     if(음력.dayOfWeek === '월') return '대체휴일';
@@ -88,6 +88,7 @@ function 대체휴일구하기(양력, 음력) {
     else if(음력.dayOfWeek === '화') return '대체휴일';
     else if(음력.dayOfWeek === '수') return '대체휴일';
   }
+  if(월 === 5 && 일 === 6 && 요일 === 1) return '대체휴일'; 
   if(년 === 2028 && 월 === 10 && 일 === 5) return '대체휴일';
 }
 
@@ -167,7 +168,6 @@ function 한해를세다(년, 오늘) {
   let 한해 = [];
   // TODO 기준 날짜를 정하기
   let 양력 = setDate(setMonth(setYear(오늘, 년 - 2333 - 1), 10), 21);
-  // const 절기들 = countSolarTerms(양력, addDays(setYear(양력, 년 - 2333), 2));
 
   function 한달을세다(월) {
 
@@ -222,11 +222,6 @@ function 한해를세다(년, 오늘) {
     
       하루.표시날짜 = 날;
       하루.양력날짜 = (하루.설 || 날 > 0) && 날 <= (기 * 요) + (판(년) && 월 === 0 ? 1 : 0) ? 양력 : null;
-
-      // TODO 하루마다 찾는 것이 아닌 데이터에 병합시키기.
-      // const 절기 = 절기들.find(item => 양력.getFullYear() === item.date.getFullYear() && 양력.getMonth() === item.date.getMonth() && 양력.getDate() === item.date.getDate());
-
-      // if(절기 && 하루.양력날짜) 하루.절기 = 절기.label;
     
       return 하루;
     }
@@ -266,54 +261,25 @@ function 한해를세다(년, 오늘) {
     한해.push(한달을세다(월));
   }
 
-  return 한해;
-}
+  const 절기들 = getSolarTerms(서기);
 
-function 한달을그리다(한달, 순서, style, 해, 해설정, 달, 달설정) {
-  const ref = useRef();
+  절기들.forEach((절기, key) => {
+    const 년 = 절기.getFullYear();
+    const 월 = 절기.getMonth();
+    const 일 = 절기.getDate();
 
-  useEffect(() => {
-    const instance = ref.current;
-
-    const handleIntersection = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // entry.target.style.backgroundColor = 'lightgreen';
-          해설정(한달.날짜.해);
-          달설정(한달.날짜.달);
-        } else {
-          // entry.target.style.backgroundColor = 'lightblue';
-        }
+    한해.forEach(한달 => {
+      한달.한달.forEach(한주 => {
+        한주.forEach(하루 => {
+          if(하루.양력날짜 && 년 === 하루.양력날짜.getFullYear() && 월 === 하루.양력날짜.getMonth() && 일 === 하루.양력날짜.getDate()) {
+            하루.절기 = key;
+          } 
+        });
       });
-    };
+    });
+  });
 
-    const options = {
-      root: null, // 루트 요소 (기본: viewport)
-      rootMargin: '0px',
-      threshold: 0.5, // 50% 가시성 이상일 때 콜백 실행
-    };
-
-    const observer = new IntersectionObserver(handleIntersection, options);
-
-    observer.observe(instance);
-    
-    return () => {
-      observer.unobserve(instance);
-    };
-  }, [한달.날짜.해, 한달.날짜.달, 해설정, 달설정]);
-
-  return (
-      <div
-        key={순서}
-        className='한달'
-        style={style}
-        ref={ref}
-        year={한달.날짜.해}
-        month={한달.날짜.달}
-      >
-        {한달.한달.map((한주, 순서) => <Week 한주={한주} 순서={순서}/>)}
-      </div>
-  );
+  return 한해;
 }
 
 function App() {
@@ -370,7 +336,7 @@ function App() {
   return (
     <div className='달력'>
 
-      <div className='헤더' ref={headerRef}>
+      <header className='헤더' ref={headerRef}>
 
         <div
           style={{
@@ -424,7 +390,7 @@ function App() {
           }) }
         </div>
 
-      </div>
+      </header>
 
       <AutoSizer>
         {({ height, width }) => (
@@ -439,17 +405,7 @@ function App() {
             // onScroll={handleScroll}
           >
             {({ data, index, style }) => {
-              return (
-                한달을그리다(
-                  data[index],
-                  index,
-                  style,
-                  해,
-                  해설정,
-                  달,
-                  달설정
-                )
-              );
+              return <Month key={`month${index}`} 한달={data[index]} 순서={index} style={style} 해설정={해설정} 달설정={달설정}/>;
             }}
           </List>
         )}

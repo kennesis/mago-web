@@ -44,8 +44,8 @@ function Day({ 하루, 순서 }) {
             {음력휴일 && <div style={{ color, fontSize: 14 }}>{음력휴일}</div>}
             {대체휴일 && <div style={{ color, fontSize: 14 }}>{대체휴일}</div>}
             {임시공휴일 && <div style={{ color, fontSize: 14 }}>{임시공휴일}</div>}
-            {명절 && <div style={{ color: 'rgba(255, 0, 0, 0.8)', fontSize: 14 }}>{명절}</div>}
             {절기 && <div style={{ color, fontSize: 14 }}>{절기}</div>}
+            {명절 && <div style={{ color: 'rgba(255, 0, 0, 0.8)', fontSize: 14 }}>{명절}</div>}
             {기념일 && <div style={{ color, fontSize: 14 }}>{기념일}</div>}
         </div>
     );
