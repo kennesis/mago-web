@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { addDays, setYear, setMonth, setDate } from 'date-fns';
-import getSolarTerms from './SolarTerms';
+import getSolarTerms from './solarTerms';
+import 일진구하기 from './sexagesimal';
 import './App.css';
 import Month from './Components/Month';
 const holidayKR = require('holiday-kr');
@@ -118,6 +119,7 @@ function 기념일구하기(양력, 음력) {
   else if(월 === 5 && 일 === 8) return '어버이날';
   else if(월 === 5 && 일 === 15) return '스승의날';
   else if(월 === 7 && 일 === 17) return '제헌절';
+  else if(음력.month === 1 && 음력.day === 15) return '정월대보름';
   else if(음력.month === 7 && 음력.day === 7) return '음 칠월칠석';
   else if(음력.month === 9 && 음력.day === 9) return '구월귀일';
 }
@@ -188,6 +190,7 @@ function 한해를세다(년, 오늘) {
         const 음력 = holidayKR.getLunar(양력);
         
         하루.음력 = `음${음력.month}.${음력.day}`;
+        하루.일진 = 일진구하기(양력);
       }
     
       if(날 <= 0 || 날 > (기 * 요) + (판(년) && 월 === 0 ? 1 : 0)) {
@@ -219,6 +222,7 @@ function 한해를세다(년, 오늘) {
         if(임시공휴일) 하루.임시공휴일 = 임시공휴일;
         if(기념일) 하루.기념일 = 기념일;
         if(명절) 하루.명절 = 명절;
+        하루.일진 = 일진구하기(양력);
       }
 
       if(날 && 양력.getFullYear() === 오늘.getFullYear() && 양력.getMonth() === 오늘.getMonth() && 양력.getDate() === 오늘.getDate()) {
@@ -227,6 +231,7 @@ function 한해를세다(년, 오늘) {
     
       하루.표시날짜 = 날;
       하루.양력날짜 = (하루.설 || 날 > 0) && 날 <= (기 * 요) + (판(년) && 월 === 0 ? 1 : 0) ? 양력 : null;
+      
     
       return 하루;
     }
@@ -295,7 +300,7 @@ function App() {
   const 일 = 오늘.getDate();
 
   const [ data ] = useState(() => {
-    return 한해를세다(단기, new Date()).flat();
+    return 한해를세다(단기, 오늘).flat();
   });
 
   const findToday = useCallback(e => {
