@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { addDays, setYear, setMonth, setDate } from 'date-fns';
@@ -317,31 +317,32 @@ function App() {
     return today;
   }, [ data, 년, 월, 일 ]);
 
+  const getScrollIndex = useCallback(e => {
+    const index = data.findIndex(element => {
+        const index2 = element.한달.flat().findIndex(item => {
+          if(item.양력날짜) {
+            return item.양력날짜.getFullYear() === 년 && item.양력날짜.getMonth() === 월 && item.양력날짜.getDate() === 일;
+          }
+          else return false;
+        })
+        return index2 >= 0;
+      }
+    );
+    // console.log('scroll: ', index);
+    return index;
+  }, [ data, 년, 월, 일 ]);
+
   const [ 해, 해설정 ] = useState(findToday().날짜.해);
   const [ 달, 달설정 ] = useState(findToday().날짜.달);
   
   const headerRef = useRef(null);
-  const listRef = useRef(null);
-
-  const scrollToday = useCallback(e => {
-    if(listRef.current) {
-      const index = data.findIndex(element => {
-          const index2 = element.한달.flat().findIndex(item => {
-            if(item.양력날짜) {
-              return item.양력날짜.getFullYear() === 년 && item.양력날짜.getMonth() === 월 && item.양력날짜.getDate() === 일;
-            }
-            else return false;
-          })
-          return index2 >= 0;
-        }
-      );  
-      listRef.current.scrollToItem(index);
+  const scrollRef = useRef(null);
+  const listRef = useCallback(node => {
+    if(node) {
+      node?.scrollToItem(getScrollIndex());
+      scrollRef.current = node;
     }
-  }, [data, 년, 월, 일]);
-
-  useEffect(() => {
-    scrollToday();
-  }, [ scrollToday ]);
+  }, [ getScrollIndex ]);
 
   return (
     <div className='달력'>
@@ -363,7 +364,15 @@ function App() {
             {달이름(달)}
           </h2>
 
-          <button className='오늘' onClick={scrollToday}>오늘</button>
+          <button
+            className='오늘'
+            onClick={el => {
+                scrollRef.current.scrollToItem(getScrollIndex())
+              }
+            }
+          >
+              오늘
+          </button>
 
         </div>
 
